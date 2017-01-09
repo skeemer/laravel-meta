@@ -1,14 +1,17 @@
-<?php namespace Kodeine\Metable;
+<?php
 
+namespace Kodeine\Metable;
 
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection as BaseCollection;
 
 trait Metable {
-
   /**
    * Meta scope for easier join
    * -------------------------
+   * @param Builder $query
+   * @return Builder
    */
   public function scopeMeta($query) {
     return $query->join($this->table . '_meta', $this->table . '.id', '=', $this->table . '_meta.' . $this->getMetaKeyName())
@@ -18,8 +21,10 @@ trait Metable {
   /**
    * Set Meta Data functions
    * -------------------------
+   * @param $key
+   * @param $value
+   * @return mixed
    */
-
   function setMeta($key, $value = null) {
     $setMeta = 'setMeta' . ucfirst(gettype($key));
 
@@ -58,8 +63,9 @@ trait Metable {
   /**
    * Unset Meta Data functions
    * -------------------------
+   * @param $key
+   * @return mixed
    */
-
   function unsetMeta($key) {
     $unsetMeta = 'unsetMeta' . ucfirst(gettype($key));
 
@@ -85,8 +91,10 @@ trait Metable {
   /**
    * Get Meta Data functions
    * -------------------------
+   * @param $key
+   * @param boolean $raw
+   * @return mixed
    */
-
   function getMeta($key = null, $raw = false) {
     if(is_string($key) && preg_match('/[,|]/is', $key, $m)) {
       $key = preg_split('/ ?[,|] ?/', $key);
@@ -147,8 +155,8 @@ trait Metable {
   /**
    * Trait specific functions
    * -------------------------
+   * @return boolean
    */
-
   protected function setObserver() {
     $this->saved(function ($model) {
       $model->saveMeta();
@@ -229,7 +237,7 @@ trait Metable {
   /**
    * Return the table name
    *
-   * @return null
+   * @return string
    */
   protected function getMetaTable() {
     return isset($this->metaTable) ? $this->metaTable : $this->getTable() . '_meta';
