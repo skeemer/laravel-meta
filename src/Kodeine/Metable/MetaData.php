@@ -3,6 +3,12 @@
 use DateTime;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * Class MetaData
+ * @package Kodeine\Metable
+ * @property string $key
+ * @property mixed $value
+ */
 class MetaData extends Model {
 
   /**
