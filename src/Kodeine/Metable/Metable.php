@@ -4,18 +4,29 @@ namespace Kodeine\Metable;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection as BaseCollection;
+use Illuminate\Support\Pluralizer;
 
+/**
+ * Class Metable
+ * @package Kodeine\Metable
+ * @method string getQualifiedKeyName()
+ * @property string $metaTable
+ * @property string $metaKeyName
+ */
 trait Metable {
+
   /**
    * Meta scope for easier join
    * -------------------------
+   * @see Model::getKeyName()
    * @param Builder $query
    * @return Builder
    */
   public function scopeMeta($query) {
-    return $query->join($this->table . '_meta', $this->table . '.id', '=', $this->table . '_meta.' . $this->getMetaKeyName())
-        ->select($this->table . '.*');
+    return $query->join($this->getMetaTable(), $this->getQualifiedKeyName(), '=', $this->getMetaQualifiedKeyName());
+        //->select($this->get . '.*');
   }
 
   /**
@@ -101,7 +112,7 @@ trait Metable {
     }
 
     $getMeta = 'getMeta' . ucfirst(strtolower(gettype($key)));
-
+error_log($getMeta);
     return $this->$getMeta($key, $raw);
   }
 
@@ -178,7 +189,7 @@ trait Metable {
 
   protected function saveMeta() {
     foreach($this->metaData as $meta) {
-
+      /** @var $meta MetaData */
       $meta->setTable($this->metaTable);
 
       if($meta->isMarkedForDeletion()) {
@@ -200,12 +211,17 @@ trait Metable {
       $this->setObserver();
 
       if($this->exists) {
-        $objects = $this->getModelStub()
+        $objects = $this->getModelStub()->newQuery()
             ->where($this->metaKeyName, $this->modelKey)
             ->get();
 
         if(!is_null($objects)) {
           $this->metaLoaded = true;
+          foreach($objects as $item) {
+            if($item->type == 'datetime' && !in_array($item->key, $this->dates)) {
+              $this->dates[] = $item->key;
+            }
+          }
 
           return $this->metaData = $objects->keyBy('key');
         }
@@ -214,6 +230,7 @@ trait Metable {
 
       return $this->metaData = new Collection();
     }
+    return $this->metaData;
   }
 
   /**
@@ -240,19 +257,18 @@ trait Metable {
    * @return string
    */
   protected function getMetaTable() {
-    return isset($this->metaTable) ? $this->metaTable : $this->getTable() . '_meta';
+    return isset($this->metaTable) ? $this->metaTable : Pluralizer::singular($this->getTable()) . '_meta';
   }
 
   /**
-   * Convert the model instance to an array.
+   * Get the meta table qualified key name.
    *
-   * @return array
+   * @return string
    */
-  public function toArray() {
-    return array_merge(parent::toArray(), [
-        'meta_data' => $this->getMeta()->toArray(),
-    ]);
+  public function getMetaQualifiedKeyName() {
+    return $this->getMetaTable().'.'.$this->getMetaKeyName();
   }
+
 
   /**
    * Model Override functions
@@ -340,7 +356,8 @@ trait Metable {
     }
 
     // if model table has the column named to the key
-    if(\Schema::hasColumn($this->getTable(), $key)) {
+    $builder = self::resolveConnection($this->connection)->getSchemaBuilder();
+    if($builder->hasColumn($this->getTable(), $key)) {
       parent::setAttribute($key, $value);
       return;
     }
@@ -364,6 +381,11 @@ trait Metable {
 
     // lets check meta data.
     return isset($this->getMetaData()[$key]);
+  }
+
+  protected function getArrayableAttributes() {
+    $attributes = array_merge($this->attributes, $this->getMeta()->toArray());
+    return $this->getArrayableItems($attributes);
   }
 
 }
