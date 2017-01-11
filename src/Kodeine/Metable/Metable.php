@@ -14,6 +14,7 @@ use Illuminate\Support\Pluralizer;
  * @method string getQualifiedKeyName()
  * @property string $metaTable
  * @property string $metaKeyName
+ * @property \Illuminate\Database\Schema\Builder $schemaBuilder
  */
 trait Metable {
 
@@ -112,7 +113,7 @@ trait Metable {
     }
 
     $getMeta = 'getMeta' . ucfirst(strtolower(gettype($key)));
-error_log($getMeta);
+
     return $this->$getMeta($key, $raw);
   }
 
@@ -269,6 +270,12 @@ error_log($getMeta);
     return $this->getMetaTable().'.'.$this->getMetaKeyName();
   }
 
+  protected function getSchemaBuilder() {
+    if(!isset($this->schemaBuilder)) {
+      $this->schemaBuilder = self::resolveConnection($this->connection)->getSchemaBuilder();
+    }
+    return $this->schemaBuilder;
+  }
 
   /**
    * Model Override functions
@@ -285,6 +292,11 @@ error_log($getMeta);
     // parent call first.
     if(($attr = parent::getAttribute($key)) !== null) {
       return $attr;
+    }
+
+    // if model table has the column named to the key
+    if($this->schemaBuilder->hasColumn($this->getTable(), $key)) {
+      return null;
     }
 
     // there was no attribute on the model
@@ -323,7 +335,7 @@ error_log($getMeta);
 
   public function __set($key, $value) {
     // ignore the trait properties being set.
-    if(starts_with($key, 'meta') || $key == 'query') {
+    if(starts_with($key, 'meta') || $key == 'query' || $key == 'schemaBuilder') {
       $this->$key = $value;
 
       return;
@@ -356,8 +368,7 @@ error_log($getMeta);
     }
 
     // if model table has the column named to the key
-    $builder = self::resolveConnection($this->connection)->getSchemaBuilder();
-    if($builder->hasColumn($this->getTable(), $key)) {
+    if($this->schemaBuilder->hasColumn($this->getTable(), $key)) {
       parent::setAttribute($key, $value);
       return;
     }
@@ -370,7 +381,7 @@ error_log($getMeta);
 
   public function __isset($key) {
     // trait properties.
-    if(starts_with($key, 'meta') || $key == 'query') {
+    if(starts_with($key, 'meta') || $key == 'query' || $key == 'schemaBuilder') {
       return isset($this->{$key});
     }
 
