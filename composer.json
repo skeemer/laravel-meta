@@ -1,8 +1,13 @@
 {
-    "name": "kodeine/laravel-meta",
+    "name": "skeemer/laravel-meta",
     "description": "Fluent Meta Data for Eloquent Models, as if it is a property on your model.",
-    "keywords": ["laravel", "meta", "metas", "meta data", "data" , "metadata", "metable", "model", "eloquent", "kodeine"],
+    "keywords": ["laravel", "meta", "metas", "meta data", "data" , "metadata", "metable", "model", "eloquent", "skeemer"],
     "authors": [
+        {
+            "name": "Leo Lutz",
+            "homepage": "https://github.com/skeemer",
+            "role": "Developer"
+        },
         {
             "name": "Ahsen M.",
             "homepage": "https://github.com/kodeine",
