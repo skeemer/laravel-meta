@@ -1,11 +1,9 @@
 # Fluent Meta Data for Eloquent Models
-[![Laravel](https://img.shields.io/badge/Laravel-~5.1-orange.svg?style=flat-square)](http://laravel.com)
-[![Source](http://img.shields.io/badge/source-kodeine/laravel--meta-blue.svg?style=flat-square)](https://github.com/kodeine/laravel-meta/)
-[![Build Status](http://img.shields.io/travis/kodeine/laravel--meta/master.svg?style=flat-square)](https://travis-ci.org/kodeine/laravel-meta)
+[![Laravel](https://img.shields.io/badge/Laravel-~5.3-orange.svg?style=flat-square)](http://laravel.com)
 [![License](http://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square)](https://tldrlegal.com/license/mit-license)
 
 Metable Trait adds the ability to access meta data as if it is a property on your model.
-Metable is Fluent, just like using an eloquent model attribute you can set or unset metas. Follow along the documentation to find out more.
+Metable is Fluent, just like using an eloquent model attribute you can set or unset metas. Follow along the documentation to find out more. This is a fork of [kodeine/laravel-meta](https://github.com/kodeine/laravel-meta) modified to run without a Laravel app and metadata flattened to the model.
 
 ## Installation
 
@@ -14,7 +12,7 @@ Metable is Fluent, just like using an eloquent model attribute you can set or un
 Add this to your composer.json file, in the require object:
 
 ```javascript
-"kodeine/laravel-meta": "dev-master"
+"skeemer/laravel-meta": "dev-master"
 ```
 
 After that, run composer install to install the package.
